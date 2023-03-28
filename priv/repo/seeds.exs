@@ -13,24 +13,26 @@
 alias TodoWithDependentTask.Todo.{Task, TaskGroup}
 alias TodoWithDependentTask.Repo
 
-task_group_1 = %TaskGroup{} |> TaskGroup.changeset(%{title: "Task group 1"}) |> Repo.insert!()
+task_group_1 = %TaskGroup{} |> TaskGroup.changeset(%{title: "Task Group 1"}) |> Repo.insert!()
 
-task_group_2 = %TaskGroup{} |> TaskGroup.changeset(%{title: "Task group 2"}) |> Repo.insert!()
+task_group_2 = %TaskGroup{} |> TaskGroup.changeset(%{title: "Task Group 2"}) |> Repo.insert!()
 
 task_1_1 =
   %Task{}
   |> Task.changeset(%{
-    description: "Task 1",
+    description: "Completed Task",
     is_completed: true,
-    task_group_id: task_group_1.id
+    task_group_id: task_group_2.id
   })
   |> Repo.insert!()
 
 %Task{}
 |> Task.changeset(%{
-  description: "Task 2",
-  task_group_id: task_group_1.id,
-  child_tasks: [%{description: "Task 2.1", task_group_id: task_group_1.id}]
+  description: "Locked Task",
+  task_group_id: task_group_2.id,
+  child_tasks: [
+    %{description: "Incomplete Task", task_group_id: task_group_2.id}
+  ]
 })
 |> Repo.insert!()
 

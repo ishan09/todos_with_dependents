@@ -1,0 +1,40 @@
+<div class="h-100 w-full flex items-center justify-center bg-teal-lightest font-sans">
+	<div class="bg-white rounded shadow p-6 m-4 w-full lg:w-3/4 lg:max-w-lg">
+        <div class="mb-4">
+            <div class="flex justify-between">
+                <h1 class="text-grey-darkest text-xl"><%= @task_group.title %></h1>
+                <%= link to: Routes.task_group_index_path(@socket, :index) do %> 
+                    <span class="text-blue-600"> All Groups</span>
+                <% end %>
+            </div>
+            <form >
+                    <div class="flex flex-col mt-4 divide-y">
+                        <div></div>
+
+                        <%= for  task <- @task_group.tasks do%>
+                            <div class="p-5 flex">
+                                <%= if task.is_locked do%>
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+                                    </svg>
+                                    <div class="font-light text-sm ml-2 text-gray-500" id={"task-#{task.id}"}><%=  task.description %></div>
+                                <% else %>
+                                    <%= if task.is_completed do%>
+                                        <input name={task.id} type="checkbox" checked={task.is_completed} phx-value-id={task.id} for={"task-#{task.id}"} class="appearance-none checked:bg-green-500" phx-click="toggle" phx-debounce="2000" />
+                                        <div class="ml-2 line-through text-gray-900" id={"task-#{task.id}"}><%=  task.description %></div>
+                                    <% else%>
+                                        <input name={task.id} type="checkbox" checked={task.is_completed} phx-value-id={task.id} for={"task-#{task.id}"} class="appearance-none checked:bg-green-500" phx-click="toggle" phx-debounce="2000" />
+                                        <div class="font-light text-sm ml-2" id={"task-#{task.id}"}><%=  task.description %></div>
+                                    <% end %>
+                                <% end %>
+                            </div>
+                        <% end %>
+                        <div>
+                    </div>
+            </div>
+        </form>
+ 
+        </div>
+    </div>
+</div>
+

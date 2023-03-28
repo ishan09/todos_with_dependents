@@ -17,7 +17,9 @@ defmodule TodoWithDependentTaskWeb.Router do
   scope "/", TodoWithDependentTaskWeb do
     pipe_through :browser
 
-    get "/", PageController, :index
+    # get "/", PageController, :index
+    live "/", TaskGroupLive.Index, :index
+    live "/:id", TaskGroupLive.Show, :show
   end
 
   # Other scopes may use custom stacks.

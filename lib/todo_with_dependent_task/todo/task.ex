@@ -7,7 +7,7 @@ defmodule TodoWithDependentTask.Todo.Task do
   schema "tasks" do
     field :description, :string
     field :is_completed, :boolean, default: false
-
+    field :is_locked, :boolean, virtual: true
     belongs_to :task_group, TaskGroup
 
     many_to_many(:parent_tasks, Task,
@@ -36,8 +36,6 @@ defmodule TodoWithDependentTask.Todo.Task do
   end
 
   defp maybe_put_assoc_child_tasks(changeset, task, %{child_tasks: _child_tasks} = attrs) do
-    IO.inspect("------------------@@@----------")
-
     changeset
     |> put_assoc(:child_tasks, get_child_tasks(task, attrs))
   end
