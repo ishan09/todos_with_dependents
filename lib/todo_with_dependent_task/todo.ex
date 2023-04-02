@@ -1,9 +1,31 @@
 defmodule TodoWithDependentTask.Todo do
   import Ecto.Query
 
+  alias Ecto.Changeset
   alias TodoWithDependentTask.Todo.{Task, TaskGroup}
   alias TodoWithDependentTask.Repo
   alias Ecto.Multi
+
+  @doc """
+  Create a TaskGroup
+  """
+  @spec create_task_group(map()) :: {:ok, %TaskGroup{}} | {:error, %Changeset{}}
+  def create_task_group(attrs) do
+    %TaskGroup{}
+    |> TaskGroup.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  @doc """
+  Create a Task
+  """
+
+  @spec create_task(map()) :: {:ok, %Task{}} | {:error, %Changeset{}}
+  def create_task(attrs) do
+    %Task{}
+    |> Task.changeset(attrs)
+    |> Repo.insert()
+  end
 
   @doc """
   List all the task groups with list of associated tasks
@@ -19,7 +41,10 @@ defmodule TodoWithDependentTask.Todo do
     |> Repo.all()
   end
 
-  @spec get_task_group(any) :: nil | %TaskGroup{}
+  @doc """
+  Get the task groups with list of associated tasks
+  """
+  @spec get_task_group(any) :: nil | %TaskGroup{tasks: [%Task{}]}
   def get_task_group(id) do
     from(tg in TaskGroup,
       left_join: t in Task,
@@ -35,11 +60,16 @@ defmodule TodoWithDependentTask.Todo do
     |> Repo.one()
   end
 
+  @doc """
+  Toggle task complete status.
+
+  If the dependent task is marked as incomplete, the parent tasks are marked as incomplete.
+  """
+  @spec toggle_task(integer()) :: {:ok, map()} | {:error, any()}
   def toggle_task(task_id) do
     task =
       Task
       |> Repo.get!(task_id)
-
 
     task
     |> toggle_task_(!task.is_completed)
@@ -48,6 +78,8 @@ defmodule TodoWithDependentTask.Todo do
     end)
     |> Repo.transaction()
   end
+
+  defp toggle_task_(task, is_completed)
 
   defp toggle_task_(task, false) do
     task = task |> Repo.preload(:parent_tasks)

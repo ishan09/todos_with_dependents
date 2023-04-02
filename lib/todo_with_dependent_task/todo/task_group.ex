@@ -13,8 +13,8 @@ defmodule TodoWithDependentTask.Todo.TaskGroup do
   end
 
   @doc false
-  def changeset(product, attrs) do
-    product
+  def changeset(task_group, attrs) do
+    task_group
     |> cast(attrs, [:title])
     |> validate_required([:title])
     |> unique_constraint(:title)

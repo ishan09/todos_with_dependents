@@ -1,7 +1,7 @@
 defmodule TodoWithDependentTaskWeb.TaskGroupLive.Show do
   use TodoWithDependentTaskWeb, :live_view
 
-  alias TodoWithDependentTask.Todo.{TaskGroup, Task}
+  alias TodoWithDependentTask.Todo.TaskGroup
   alias TodoWithDependentTask.Todo
 
   def mount(%{"id" => id} = _params, _session, socket) do
@@ -13,9 +13,10 @@ defmodule TodoWithDependentTaskWeb.TaskGroupLive.Show do
   end
 
   def handle_event("toggle", params, socket) do
-    %{"id" => id} = params
-    toggle_task(id)
-    {:noreply, assign(socket, task_group: get_task_group(socket.assigns.task_group.id))}
+    with %{"id" => id} = params,
+         {:ok, _} <- toggle_task(id) do
+      {:noreply, assign(socket, task_group: get_task_group(socket.assigns.task_group.id))}
+    end
   end
 
   defp apply_action(socket, _, _) do
@@ -45,6 +46,6 @@ defmodule TodoWithDependentTaskWeb.TaskGroupLive.Show do
   end
 
   defp toggle_task(id) do
-    {:ok, _} = Todo.toggle_task(id)
+    Todo.toggle_task(id)
   end
 end
