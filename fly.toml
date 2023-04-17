@@ -5,9 +5,6 @@ mounts = []
 primary_region = "ams"
 processes = []
 
-[env]
-  PHX_HOST = "todo-191.fly.dev"
-
 [[services]]
   internal_port = 8080
   processes = ["app"]
