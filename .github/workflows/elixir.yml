@@ -16,16 +16,30 @@ permissions:
 
 jobs:
   build:
+    services:
+      db:
+        image: postgres:12
+        ports: ["5432:5432"]
+        env:
+          POSTGRES_PASSWORD: postgres
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     name: Build and test
     runs-on: ubuntu-22.04
 
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
+
       - name: Set up Elixir
         uses: erlef/setup-beam@v1
         with:
-          elixir-version: "1.13.3"
-          otp-version: "24"
+          elixir-version: "1.14.1"
+          otp-version: "25.0.4"
       - name: Restore dependencies cache
         uses: actions/cache@v3
         with:
@@ -34,5 +48,7 @@ jobs:
           restore-keys: ${{ runner.os }}-mix-
       - name: Install dependencies
         run: mix deps.get
+      - name: Check Formatting
+        run: mix format
       - name: Run tests
         run: mix test
