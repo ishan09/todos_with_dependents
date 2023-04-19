@@ -7,12 +7,46 @@
                     <span class="text-blue-600"> All Groups</span>
                 <% end %>
             </div>
-            <form >
-                    <div class="flex flex-col mt-4 divide-y">
-                        <div></div>
+            <%=if @live_action in [:new, :edit] do %>
+                <.form 
+                    let={f}
+                    for={@changeset}
+                    id="new-task-form"
+                    phx-change="validate"
+                    phx-submit="save">
+                    <div class="mb-4">
+                        <%= label f, :description, class: "block text-gray-700 text-sm font-bold mb-2" %>
+                        <%= text_input f, :description, class: "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-indigo-500" %>
+                        <%= error_tag f, :description %>
+                    </div>
 
-                        <%= for  task <- @task_group.tasks do%>
-                            <div class="p-5 flex">
+                        <%= label f, :parent_tasks , class: "block text-gray-700 text-sm font-bold mb-2" %>
+                        
+                        <.live_component
+                            id="multi"
+                            module={MultiSelectComponent}
+                            options={@parent_tasks_selectable_options}
+                            selected={fn opts -> 
+                                send(self(), {:updated_parent_tasks, opts}) end}
+                        />
+                    <%= hidden_input f, :task_group_id, value: @task_group.id %>
+                    <div class="flex justify-center flex-col">
+                    <%= submit "Save", phx_disable_with: "Saving...", class: "w-full bg-indigo-500 text-white text-sm mt-5 font-bold py-2 px-4 rounded-md hover:bg-indigo-600 transition duration-300" %>
+                    <%= link to: Routes.task_group_show_path(@socket, :show, @task_group.id) do %> 
+                        <span class="text-blue-600">Cancel</span>
+                    <% end %>
+                    </div>
+                </.form>
+
+            <% else %>
+                <div class="flex flex-col mt-4 divide-y">
+                    <div> 
+                        <button phx-click="add-new" class="rounded-none bg-cyan-400 p-1 m-1">Add New</button>
+                    </div>
+
+                    <%= for  task <- @task_group.tasks do%>
+                        <div class="p-5 flex justify-between">
+                            <div class="flex">
                                 <%= if task.is_locked do%>
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
@@ -26,13 +60,20 @@
                                         <input name={task.id} type="checkbox" checked={task.is_completed} phx-value-id={task.id} for={"task-#{task.id}"} class="appearance-none checked:bg-green-500" phx-click="toggle" phx-debounce="2000" />
                                         <div class="font-light text-sm ml-2" id={"task-#{task.id}"}><%=  task.description %></div>
                                     <% end %>
+
                                 <% end %>
                             </div>
-                        <% end %>
-                        <div>
-                    </div>
+                            <div>
+                                <button phx-click="edit-task" phx-value-task_id={task.id} class="outline outline-offset-1 outline-2 rounded-full p-1 ml-1"><.pencil /></button>
+                                <button phx-click="delete-task" phx-value-task_id={task.id} class="outline outline-offset-1 outline-2 rounded-full p-1 ml-1"><.delete /></button>
+                            </div>
+                        </div>
+                    <% end %>
+                    <div>
+                </div>
             </div>
-        </form>
+        <%end %>
+
  
         </div>
     </div>

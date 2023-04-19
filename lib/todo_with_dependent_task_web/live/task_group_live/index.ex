@@ -14,6 +14,7 @@ defmodule TodoWithDependentTaskWeb.TaskGroupLive.Index do
         summary: get_task_group_summary(task_group)
       }
     end)
+    |> Enum.sort_by(& &1.title)
   end
 
   defp get_task_group_summary(%{tasks: tasks}) when is_list(tasks) do

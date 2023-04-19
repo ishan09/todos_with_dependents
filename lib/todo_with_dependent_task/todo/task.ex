@@ -25,28 +25,44 @@ defmodule TodoWithDependentTask.Todo.Task do
     timestamps()
   end
 
-  @doc false
+  # @spec changeset(%Task{}, map.t):: %Ecto.Changeset{}
   def changeset(task, attrs) do
-    task = Repo.preload(task, :child_tasks)
+    task = Repo.preload(task, [:child_tasks, :parent_tasks])
+    IO.inspect(attrs, label: "task.ex: 31:: attrs")
 
     task
     |> cast(attrs, [:description, :is_completed, :task_group_id])
     |> validate_required([:description, :task_group_id])
-    |> maybe_put_assoc_child_tasks(task, attrs)
+    |> maybe_put_assoc_tasks(task,:child_tasks, attrs)
+    |> maybe_put_assoc_tasks(task, :parent_tasks, attrs)
   end
 
-  defp maybe_put_assoc_child_tasks(changeset, task, %{child_tasks: _child_tasks} = attrs) do
+  defp maybe_put_assoc_tasks(changeset, task, :child_tasks, %{"child_tasks" => child_tasks}) do
+    maybe_put_assoc_tasks(changeset, task, :child_tasks, %{child_tasks: child_tasks})
+  end
+
+  defp maybe_put_assoc_tasks(changeset, task, :child_tasks, %{child_tasks: child_tasks} = attrs) do
+    child_tasks =
+      ((task.child_tasks || []) ++ child_tasks)
+      |> Enum.uniq(& &1.id)
+
     changeset
-    |> put_assoc(:child_tasks, get_child_tasks(task, attrs))
+    |> put_assoc(:child_tasks, child_tasks)
   end
 
-  defp maybe_put_assoc_child_tasks(changeset, _, _), do: changeset
-
-  defp get_child_tasks(task, %{child_tasks: child_tasks}) when is_list(child_tasks) do
-    (task.child_tasks || []) ++ child_tasks
+  defp maybe_put_assoc_tasks( changeset, task, :parent_tasks, %{"parent_tasks" => parent_tasks}) do
+    maybe_put_assoc_tasks( changeset, task, :parent_tasks, %{parent_tasks: parent_tasks})
   end
 
-  defp get_child_tasks(task, _) do
-    task.child_tasks || []
+  defp maybe_put_assoc_tasks( changeset, task, :parent_tasks, %{parent_tasks: parent_tasks}) do
+    parent_tasks =
+      ((task.parent_tasks || []) ++ parent_tasks)
+      |> Enum.uniq(& &1.id)
+
+      changeset
+      |> put_assoc(:parent_tasks, parent_tasks)
   end
+
+  defp maybe_put_assoc_tasks(changeset, _,_, _), do: changeset
+
 end
