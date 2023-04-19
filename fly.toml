@@ -1,4 +1,4 @@
-app = "todo-191"
+app = "ishansharma191-todo"
 kill_signal = "SIGINT"
 kill_timeout = 5
 mounts = []
@@ -6,7 +6,7 @@ primary_region = "ams"
 processes = []
 
 [env]
-  PHX_HOST = "todo-191.fly.dev"
+  PHX_HOST = "ishansharma191-todo.fly.dev"
   PORT = "8080"
 
 [[services]]
