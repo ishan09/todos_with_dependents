@@ -44,7 +44,7 @@ defmodule TodoWithDependentTask.Todo.Task do
   defp maybe_put_assoc_tasks(changeset, task, :child_tasks, %{child_tasks: child_tasks} = attrs) do
     child_tasks =
       ((task.child_tasks || []) ++ child_tasks)
-      |> Enum.uniq(& &1.id)
+      |> Enum.uniq_by(& &1.id)
 
     changeset
     |> put_assoc(:child_tasks, child_tasks)
@@ -57,7 +57,7 @@ defmodule TodoWithDependentTask.Todo.Task do
   defp maybe_put_assoc_tasks( changeset, task, :parent_tasks, %{parent_tasks: parent_tasks}) do
     parent_tasks =
       ((task.parent_tasks || []) ++ parent_tasks)
-      |> Enum.uniq(& &1.id)
+      |> Enum.uniq_by(& &1.id)
 
       changeset
       |> put_assoc(:parent_tasks, parent_tasks)
