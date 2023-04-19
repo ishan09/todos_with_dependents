@@ -17,6 +17,18 @@ defmodule TodoWithDependentTask.Todo do
   end
 
   @doc """
+  Get task by id
+
+  returns Task or raises Ecto.NoResultsError if no record was found
+  """
+  def get_task(id, preload \\ []) do
+    Task
+    |> Repo.get!( id)
+    |> Repo.preload(preload)
+  end
+
+
+  @doc """
   Create a Task
   """
 
@@ -25,6 +37,24 @@ defmodule TodoWithDependentTask.Todo do
     %Task{}
     |> Task.changeset(attrs)
     |> Repo.insert()
+  end
+
+  @doc """
+  Update a Task
+  """
+
+  @spec update_task(%Task{}, map()) :: {:ok, %Task{}} | {:error, %Changeset{}}
+  def update_task(%Task{} = task, attrs) do
+    task
+    |> Task.changeset(attrs)
+    |> Repo.update()
+  end
+
+  @doc """
+  Delete a Task
+  """
+  def delete_task(%Task{} = task) do
+    Repo.delete(task)
   end
 
   @doc """

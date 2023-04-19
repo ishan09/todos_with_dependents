@@ -9,6 +9,9 @@
 #
 # We recommend using the bang functions (`insert!`, `update!`
 # and so on) as they will fail if something goes wrong.
+    alias TodoWithDependentTask.Todo.{TaskGroup, Task}
+    alias TodoWithDependentTask.Repo
+
 
     task_group_1 = %TaskGroup{} |> TaskGroup.changeset(%{title: "Task Group 1"}) |> Repo.insert!()
 

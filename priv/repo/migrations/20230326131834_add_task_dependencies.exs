@@ -3,8 +3,8 @@ defmodule TodoWithDependentTask.Repo.Migrations.AddTaskDependencies do
 
   def change do
     create table(:task_dependencies, primary_key: false) do
-      add :parent_task_id, references(:tasks), primary_key: true
-      add :child_task_id, references(:tasks), primary_key: true
+      add :parent_task_id, references(:tasks, on_delete: :delete_all), primary_key: true
+      add :child_task_id, references(:tasks, on_delete: :delete_all), primary_key: true
     end
 
     create unique_index(:task_dependencies, [:parent_task_id, :child_task_id],

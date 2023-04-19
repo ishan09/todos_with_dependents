@@ -18,8 +18,11 @@ defmodule TodoWithDependentTaskWeb.Router do
     pipe_through :browser
 
     # get "/", PageController, :index
-    live "/", TaskGroupLive.Index, :index
-    live "/:id", TaskGroupLive.Show, :show
+    live "/task_groups/", TaskGroupLive.Index, :index
+    live "/task_groups/new", TaskGroupLive.Index, :new
+    live "/task_groups/:id", TaskGroupLive.Show, :show
+    live "/task_groups/:id/new", TaskGroupLive.Show, :new
+    live "/task_groups/:id/tasks/:task_id", TaskGroupLive.Show, :edit
   end
 
   # Other scopes may use custom stacks.
