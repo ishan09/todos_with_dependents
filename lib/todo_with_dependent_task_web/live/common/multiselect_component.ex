@@ -73,8 +73,7 @@ defmodule TodoWithDependentTaskWeb.MultiSelectComponent do
     end)
   end
 
-  def handle_event("checked", %{"multi_select" => %{"options" => values}} = params, socket) do
-    # IO.inspect(params, label: "multiselect_component.ex: 74:: params")
+  def handle_event("checked", %{"multi_select" => %{"options" => values}} = _params, socket) do
     [{index, %{"selected" => selected?}}] = Map.to_list(values)
     index = String.to_integer(index)
     current_option = Enum.at(socket.assigns.options, index)

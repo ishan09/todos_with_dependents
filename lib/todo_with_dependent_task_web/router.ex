@@ -19,6 +19,7 @@ defmodule TodoWithDependentTaskWeb.Router do
 
     # get "/", PageController, :index
     live "/task_groups/", TaskGroupLive.Index, :index
+    live "/task_groups/new", TaskGroupLive.Index, :new
     live "/task_groups/:id", TaskGroupLive.Show, :show
     live "/task_groups/:id/new", TaskGroupLive.Show, :new
     live "/task_groups/:id/tasks/:task_id", TaskGroupLive.Show, :edit

@@ -7,7 +7,7 @@
                     <span class="text-blue-600"> All Groups</span>
                 <% end %>
             </div>
-            <%=if @live_action in [:new, :edit] do %>
+        <%=if @live_action in [:new, :edit] do %>
                 <.form 
                     let={f}
                     for={@changeset}
@@ -17,7 +17,9 @@
                     <div class="mb-4">
                         <%= label f, :description, class: "block text-gray-700 text-sm font-bold mb-2" %>
                         <%= text_input f, :description, class: "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-indigo-500" %>
-                        <%= error_tag f, :description %>
+                        <div class="block text-sm mb-2">
+                        <%= error_tag f, :description  %>
+                        </div>
                     </div>
 
                         <%= label f, :parent_tasks , class: "block text-gray-700 text-sm font-bold mb-2" %>
@@ -30,9 +32,9 @@
                                 send(self(), {:updated_parent_tasks, opts}) end}
                         />
                     <%= hidden_input f, :task_group_id, value: @task_group.id %>
-                    <div class="flex justify-center flex-col">
+                    <div class="flex items-center flex-col">
                     <%= submit "Save", phx_disable_with: "Saving...", class: "w-full bg-indigo-500 text-white text-sm mt-5 font-bold py-2 px-4 rounded-md hover:bg-indigo-600 transition duration-300" %>
-                    <%= link to: Routes.task_group_show_path(@socket, :show, @task_group.id) do %> 
+                    <%= link to: Routes.task_group_show_path(@socket, :show, @task_group.id), class: "mt-2" do %> 
                         <span class="text-blue-600">Cancel</span>
                     <% end %>
                     </div>

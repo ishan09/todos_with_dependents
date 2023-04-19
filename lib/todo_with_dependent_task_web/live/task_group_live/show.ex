@@ -8,8 +8,7 @@ defmodule TodoWithDependentTaskWeb.TaskGroupLive.Show do
   alias TodoWithDependentTaskWeb.MultiSelectComponent
 
 
-  def mount(%{"id" => id} = params, _session, socket) do
-    # IO.inspect(params, label: "show.ex: 8:: in  mount params")
+  def mount(%{"id" => id} = _params, _session, socket) do
     {:ok, assign(socket, :task_group, get_task_group(id))}
   end
 
@@ -24,7 +23,7 @@ defmodule TodoWithDependentTaskWeb.TaskGroupLive.Show do
     end
   end
 
-  def handle_event("add-new", params, socket) do
+  def handle_event("add-new", _params, socket) do
       {:noreply, push_patch(socket, to: Routes.task_group_show_path(socket, :new, socket.assigns.task_group.id)) }
   end
 
@@ -51,6 +50,7 @@ defmodule TodoWithDependentTaskWeb.TaskGroupLive.Show do
   end
 
   def handle_info({:updated_parent_tasks, options}, socket) do
+    IO.inspect(options, label: "show.ex: 53:: options")
     {:noreply, assign(socket, :parent_tasks_selectable_options, options)}
   end
 
@@ -82,9 +82,9 @@ defmodule TodoWithDependentTaskWeb.TaskGroupLive.Show do
     selected_parent_tasks =
       socket.assigns.task_group.tasks
       |> Enum.filter(fn task ->
-        Enum.any?(socket.assigns.parent_tasks_selectable_options, & &1.selected && &1.id == task.id )
+        Enum.any?(socket.assigns.parent_tasks_selectable_options, & &1.selected in [true, "true"] && &1.id == task.id )
       end)
-
+      IO.inspect(selected_parent_tasks, label: "show.ex: 87:: selected_parent_tasks")
       Map.merge(task_params, %{"parent_tasks" =>  selected_parent_tasks})
   end
 
@@ -96,7 +96,7 @@ defmodule TodoWithDependentTaskWeb.TaskGroupLive.Show do
   end
 
   defp get_task(id) do
-    Todo.get_task(id, [:parent_tasks])
+    Todo.get_task(id, [:parent_tasks, :child_tasks])
   end
 
   defp task_group_view(%TaskGroup{} = task_group) do
@@ -108,14 +108,7 @@ defmodule TodoWithDependentTaskWeb.TaskGroupLive.Show do
   end
 
   defp task_view(task) do
-    # %{
-    #   id: task.id,
-    #   description: task.description,
-    #   is_completed: task.is_completed,
-    #   is_locked: Enum.any?(task.child_tasks, &(!&1.is_completed))
-    # }
     Map.replace(task, :is_locked, Enum.any?(task.child_tasks, &(!&1.is_completed)))
-
   end
 
   defp save_task(socket, :edit, task_params) do
@@ -153,18 +146,24 @@ defmodule TodoWithDependentTaskWeb.TaskGroupLive.Show do
   end
 
 
-  defp to_select_options(tasks, task) do
+  defp to_select_options(available_tasks, task) do
     parent_tasks =
       case task.parent_tasks do
         parent_tasks when is_list(parent_tasks) -> parent_tasks
         _ -> []
       end
 
-    tasks
+    available_tasks
+    |> reject_self_completed_and_child_tasks(task)
     |> Enum.map(fn t ->
       %SelectOption{id: t.id, label: t.description, selected: Enum.any?(parent_tasks, & &1.id == t.id)}
     end)
-    |> Enum.filter(& &1.id != task.id)
+  end
+
+  defp reject_self_completed_and_child_tasks(available_tasks, %Task{id: nil}), do: available_tasks
+
+  defp reject_self_completed_and_child_tasks(available_tasks, task) do
+    available_tasks |> Enum.reject(& &1.id == task.id || &1.is_completed || Enum.any?(task.child_tasks, fn child_task -> child_task.id == &1.id end))
   end
 
   defp toggle_task(id) do

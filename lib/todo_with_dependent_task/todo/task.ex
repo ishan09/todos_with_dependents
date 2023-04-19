@@ -27,8 +27,9 @@ defmodule TodoWithDependentTask.Todo.Task do
 
   # @spec changeset(%Task{}, map.t):: %Ecto.Changeset{}
   def changeset(task, attrs) do
-    task = Repo.preload(task, [:child_tasks, :parent_tasks])
-    IO.inspect(attrs, label: "task.ex: 31:: attrs")
+    task =
+      task
+      |> Repo.preload([:child_tasks, :parent_tasks])
 
     task
     |> cast(attrs, [:description, :is_completed, :task_group_id])
@@ -41,13 +42,9 @@ defmodule TodoWithDependentTask.Todo.Task do
     maybe_put_assoc_tasks(changeset, task, :child_tasks, %{child_tasks: child_tasks})
   end
 
-  defp maybe_put_assoc_tasks(changeset, task, :child_tasks, %{child_tasks: child_tasks} = attrs) do
-    child_tasks =
-      ((task.child_tasks || []) ++ child_tasks)
-      |> Enum.uniq_by(& &1.id)
-
-    changeset
-    |> put_assoc(:child_tasks, child_tasks)
+  defp maybe_put_assoc_tasks(changeset, task, :child_tasks, %{child_tasks: child_tasks} = _attrs) do
+    child_tasks = Enum.filter(child_tasks, &(Map.has_key?(&1, :id) &&  &1.id != task.id))
+    changeset |> put_assoc(:child_tasks, child_tasks)
   end
 
   defp maybe_put_assoc_tasks( changeset, task, :parent_tasks, %{"parent_tasks" => parent_tasks}) do
@@ -56,13 +53,17 @@ defmodule TodoWithDependentTask.Todo.Task do
 
   defp maybe_put_assoc_tasks( changeset, task, :parent_tasks, %{parent_tasks: parent_tasks}) do
     parent_tasks =
-      ((task.parent_tasks || []) ++ parent_tasks)
-      |> Enum.uniq_by(& &1.id)
-
-      changeset
-      |> put_assoc(:parent_tasks, parent_tasks)
+      parent_tasks
+      |> Enum.filter(&(Map.has_key?(&1, :id) && &1.id != task.id))
+      |> reject_self_and_child_tasks(task)
+    changeset |> put_assoc(:parent_tasks, parent_tasks)
   end
 
   defp maybe_put_assoc_tasks(changeset, _,_, _), do: changeset
 
+  defp reject_self_and_child_tasks(new_associated_tasks, %Task{id: nil}), do: new_associated_tasks
+
+  defp reject_self_and_child_tasks(new_associated_tasks, task) do
+    new_associated_tasks |> Enum.reject(& Map.has_key?(&1, :id) && (&1.id == task.id || Enum.any?(task.child_tasks, fn child_task -> child_task.id == &1.id end) ))
+  end
 end

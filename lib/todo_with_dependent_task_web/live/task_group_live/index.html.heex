@@ -2,7 +2,36 @@
 <div class="h-100 w-full flex items-center justify-center bg-teal-lightest font-sans">
 	<div class="bg-white rounded shadow p-6 m-4 w-full lg:w-3/4 lg:max-w-lg">
         <div class="mb-4">
-            <h1 class="text-grey-darkest text-xl">ToDo</h1>
+            <div class="flex justify-between">
+                <h1 class="text-grey-darkest text-xl">ToDo</h1>
+                <button phx-click="add-new" class="rounded-none bg-cyan-400 p-1 m-1">Add New</button>
+            </div>
+            <%=if @live_action in [:new, :edit] do %>
+                <.form 
+                    let={f}
+                    for={@changeset}
+                    id="new-task-form"
+                    phx-change="validate"
+                    phx-submit="save">
+                    
+                    <div class="mb-4">
+                        <%= label f, :title, class: "block text-gray-700 text-sm font-bold mb-2" %>
+                        <%= text_input f, :title, class: "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-indigo-500" %>
+                        <%= error_tag f, :title %>
+                    </div>
+
+                        
+                    <div class="flex justify-center flex-col">
+                        <%= submit "Save", phx_disable_with: "Saving...", class: "w-full bg-indigo-500 text-white text-sm mt-5 font-bold py-2 px-4 rounded-md hover:bg-indigo-600 transition duration-300" %>
+                        <%= link to: Routes.task_group_index_path(@socket, :index) do %> 
+                            <span class="text-blue-600">Cancel</span>
+                        <% end %>
+                    </div>
+                </.form>
+
+            <% else %>
+
+
             <div class="flex flex-col mt-4 divide-y">
                 <div></div>
                 <%= for  task_group <- @task_groups do %>
@@ -16,11 +45,9 @@
                         <div class="font-light text-sm	"><%= task_group.summary %></div>
                     </div>
                 <%end %>
-        <div>
-        </div>
-
-
+                <div></div>
             </div>
+        <% end %>
         </div>
     </div>
 </div>
