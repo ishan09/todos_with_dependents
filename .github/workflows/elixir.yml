@@ -54,6 +54,8 @@ jobs:
         run: mix test
 
   deploy:
+    needs: build
+    if: github.repository == 'master'
     name: Deploy app
     runs-on: ubuntu-latest
     steps:
