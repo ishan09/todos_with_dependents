@@ -43,7 +43,7 @@ defmodule TodoWithDependentTask.Todo.Task do
   end
 
   defp maybe_put_assoc_tasks(changeset, task, :child_tasks, %{child_tasks: child_tasks} = _attrs) do
-    child_tasks = Enum.filter(child_tasks, &(Map.has_key?(&1, :id) &&  &1.id != task.id))
+    child_tasks = reject_self_and_parent_tasks(child_tasks, task)
     changeset |> put_assoc(:child_tasks, child_tasks)
   end
 
@@ -52,10 +52,7 @@ defmodule TodoWithDependentTask.Todo.Task do
   end
 
   defp maybe_put_assoc_tasks( changeset, task, :parent_tasks, %{parent_tasks: parent_tasks}) do
-    parent_tasks =
-      parent_tasks
-      |> Enum.filter(&(Map.has_key?(&1, :id) && &1.id != task.id))
-      |> reject_self_and_child_tasks(task)
+    parent_tasks = reject_self_and_child_tasks(parent_tasks, task)
     changeset |> put_assoc(:parent_tasks, parent_tasks)
   end
 
@@ -66,4 +63,13 @@ defmodule TodoWithDependentTask.Todo.Task do
   defp reject_self_and_child_tasks(new_associated_tasks, task) do
     new_associated_tasks |> Enum.reject(& Map.has_key?(&1, :id) && (&1.id == task.id || Enum.any?(task.child_tasks, fn child_task -> child_task.id == &1.id end) ))
   end
+
+  defp reject_self_and_parent_tasks(new_associated_tasks, task) do
+    new_associated_tasks
+    |> Enum.reject( fn new_associated_task ->  Map.has_key?(new_associated_task, :id) && (new_associated_task.id == task.id || Enum.any?(task.parent_tasks, fn parent_task -> parent_task.id == new_associated_task.id end) ) end)
+  end
+
+
+
+
 end
