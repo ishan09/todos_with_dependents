@@ -55,7 +55,7 @@ jobs:
 
   deploy:
     needs: build
-    if: github.repository == 'master'
+    if: github.branch == 'master'
     name: Deploy app
     runs-on: ubuntu-latest
     steps:
